@@ -1,0 +1,106 @@
+Procedimineto para Listar
+create definer=`root`@`localhost`procedure`sp_listar_preguntas`()
+BEGIN
+select * from preguntas;
+end;
+
+
+Procedimineto para Insertar
+create definer=`root`@`localhost`procedure`sp_crear_preguntas`(
+in pregunta varchar(250),
+    in opcion1 varchar(250),
+    in opcion2 varchar(250),
+    in opcion3 varchar(250),
+    in opcion4 varchar(250)
+)
+BEGIN
+set @s = concat("insert into preguntas (pregunta, opcion1, opcion2, opcion3, opcion4) values('",pregunta,"', '",opcion1,"', '",opcion2,"', '",opcion3,"', '",opcion4,"')");
+prepare stmt from @s;
+execute stmt;
+deallocate prepare stmt;
+end;
+
+
+Procedimineto para Eliminar
+create definer=`root`@`localhost`procedure`sp_eliminar_pregunta`(
+in param int)
+BEGIN
+set @s = concat("delete from preguntas where id ='",param,"'");
+prepare stmt from @s;
+execute stmt;
+deallocate prepare stmt;
+end;
+
+
+Procedimineto para Listar Pregunta a Modificar
+create definer=`root`@`localhost`procedure`sp_listar_pregunta`(
+in id varchar(250)
+)
+BEGIN
+set @s = concat("select * form preguntas where id = '",id,"'");
+prepare stmt from @s;
+execute stmt;
+deallocate prepare stmt;
+end;
+
+
+Procedimiento para Modificar Pregunta
+create definer=`root`@`localhost`procedure`sp_modificar_pregunta`(
+	in id int,
+	in pregunta varchar(250),
+    in opcion1 varchar(250),
+    in opcion2 varchar(250),
+    in opcion3 varchar(250),
+    in opcion4 varchar(250)
+)
+BEGIN
+    set @s = concat("update preguntas set pregunta='",pregunta,"', opcion1='",opcion1,"', opcion2='",opcion2,"', opcion3='",opcion3,"', opcion4='",opcion4,"' where id='",id,"'");
+    prepare stmt from @s;
+execute stmt;
+deallocate prepare stmt;
+end;
+
+procedimiento para actualizar votos de la provincia seleccionada
+create definer=`root`@`localhost`procedure`sp_actualizar_votos_provincia`(
+IN id int,
+    in voto int
+)
+BEGIN
+set @s=concat("update provincias set voto='",voto,"' where id='",id,"'");
+prepare stmt from @s;
+execute stmt;
+deallocate prepare stmt;
+end;
+
+procedimiento para listar las opciones de la encuesta
+create definer=`root`@`localhost`procedure`sp_listar_opciones_encuesta`()
+BEGIN
+SELECT e.id, e.opcion1, e.opcion2, e.opcion3, e.opcion4, re.voto1, re.voto2, re.voto3, re.voto4 from encuestados as e inner join registro_encuestados as re on e.id = re.id
+end;
+
+procedimiento para actualizar las opciones de las preguntas para registrar la encuesta
+create definer=`root`@`localhost`procedure`sp_actualizar_registro_encuestados`(
+in id int,
+in voto1 int,
+in voto2 int,
+in voto3 int,
+in voto4 int
+)
+BEGIN
+set @s = concat("update registro_encuestados set voto1='",voto1,"', voto2='",voto2,"', voto3='",voto3,"', voto4='",voto4,"' where id='",id,"'");
+    prepare stmt from @s;
+execute stmt;
+deallocate prepare stmt;
+end;
+
+porcedimiento para listar las preguntas para registrar la encuesta
+create definer=`root`@`localhost`procedure`sp_opciones_encuestados`()
+begin
+select * from encuestados;
+end;
+
+procedimiento para listar provincias
+create definer=`root`@`localhost`procedure`sp_listar_provincias`()
+begin
+select provincia from provincias;
+end

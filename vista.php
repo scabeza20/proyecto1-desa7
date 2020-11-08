@@ -1,51 +1,107 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="css/estilo.css">
-  <title >Encuestados</title>
-</head>
-<body>
-<h1>Bienvenido al sitio de Encuesta</h1>
-<?php
+<HTML LANG="es">
+<HEAD>
+<TITLE >Registro</TITLE>
+<LINK REL= " stylesheet" TYPE= "text/css" href= "css/estilo.css">
+</HEAD>
+<BODY>
+<?PHP
+    header('Content-Type: text/html; charset=ISO-8859-1');
+    require_once("class/preguntas.php" );
+    require_once('procesar.php');
 
-header('Content-Type: text/html; charset=ISO-8859-1');
-require_once('class/config.php');
+    if(array_key_exists('enviar', $_POST)){
+        $encuesta = new preguntas();
+        $resultado = $encuesta->listar_opciones_encuesta();
+        
+        //se realiza una consulta a la tabla de preguntas para registrar la encuesta
+        foreach ($resultado as $opciones) {
+            $id = $opciones['id'];
+            $op1 = $opciones['opcion1'];
+            $op2 = $opciones['opcion2'];
+            $op3 = $opciones['opcion3'];
+            $op4 = $opciones['opcion4'];
+            $voto1 = $opciones['voto1'];
+            $voto2 = $opciones['voto2'];
+            $voto3 = $opciones['voto3'];
+            $voto4 = $opciones['voto4'];
+            
+            //se toma la opcion de cada pregunta agrupada por nombre pregunta1, pregunta2 o pregunta3
+            $opcion = $_REQUEST['pregunta'.$id];
+            //se comparan todas las opciones para saber cual fue selecionada por cada pregunta
+            if($opcion == $op1){
+                ($voto1 = $voto1 + 1);
+            
+            }else if($opcion == $op2){
+                ($voto2 = $voto2 + 1);
+            
+            }else if($opcion == $op3){
+                ($voto3 = $voto3 + 1);
+            
+            }else if($opcion == $op4){
+                ($voto4 = $voto4 + 1);
+            }
+            //se realiza una consulta para actualizar los votos por las opciones seleccionadas por el usuario en cada pregunta
+            $actualizar = new preguntas();
+            $result = $actualizar->actualizar_votos_registro_encuesta($id, $voto1, $voto2, $voto3, $voto4);
+        }
 
-$noticias = $conexion->prepare("
-CALL `sp_listar_encuesta_random`()
-");
-// Ejecutamos la consulta
-$noticias->execute();
-$noticias = $noticias->fetchAll();
+        //se realiza una consulta a la tabla provincia y se compara para saber la opcion selecionada
+        $provincia = new preguntas();
+        $resultado_provincia = $provincia->provincia_encuesta();
+        
+        $provincia_seleccionada = $_REQUEST['provincias'];
+        foreach ($resultado_provincia as $datos) {
+            $id_provincia = $datos['id'];
+            $opcion_provincia = $datos['provincia'];
+            $voto = $datos['voto'];
 
-$noticias2 = $conexion->prepare("
-CALL `sp_listar_encuesta_usuario`()
-");
+            if($provincia_seleccionada == $opcion_provincia){
+                $voto = $voto + 1;
+            }
+            //se realiza una consulta a la tabla porvincia para actualizar la opcion selecionada por el usuario
+            $actualizar_provincia = new preguntas();
+            $result_provincia = $actualizar_provincia->actualizar_votos_provincia($id_provincia, $voto);
+        }
+    }
 
-$noticias2->execute();
-$noticias2 = $noticias2->fetchAll();
-$porcentaje=0;
-echo"Porcentaje de respuestas:\n". $porcentaje."%";
-$nfilas=count ($noticias);
 
+    if(array_key_exists('enviar_encuesta', $_POST)){
+        print("<h2>Sus respuetas han sido enviadas.\nGracias por participar.</h2>");
+        print("<p><a href='reporte.php'>Ver Resultados</a></p>");
+        print("<p><a href='Registro_encuesta.php'>Realizar la Encuesta de Nuevo</a></p>");
+        
+    }else{
+        print("<H1>Bienvenido al sitio de Encuesta</H1>");
 
-    foreach ($noticias as $resultado ) {
-      ?>
-        <form method='POST' action='procesar.php'>
-        <p>&laquo;
-        <input type='hidden' name='encid<?php printf($resultado['id'])?>' value='<?php printf($resultado['id'])?>'>
-       <label><?php printf($resultado['encprg']) ?></label> </p>                                                             
-      <input type='<?php printf($resultado['input'])?>' name='respuesta<?php printf($resultado['id'])?>' value='<?php printf($resultado['encrpt1'])?>' <?php printf($resultado['requerido'])?>> <?php printf($resultado['encrpt1'])?><br>
-      <input type='<?php printf($resultado['input'])?>' name='respuesta<?php printf($resultado['id'])?>' value='<?php printf($resultado['encrpt2'])?>'><?php printf($resultado['encrpt2'])?><br>
-      <input type='<?php printf($resultado['input'])?>' name='respuesta<?php printf($resultado['id'])?>' value='<?php printf($resultado['encrpt3'])?>'><?php printf($resultado['encrpt3'])?><br>
-      <input type='<?php printf($resultado['input'])?>' name='respuesta<?php printf($resultado['id'])?>' value='<?php printf($resultado['encrpt4'])?>'><?php printf($resultado['encrpt4'])?><br>
-        <?php
-}
+        $obj_preguntas = new preguntas();
+        $noticias = $obj_preguntas->listar_random();
+        $porcentaje = 0;
+        echo"Porcentaje de respuestas:\n". $porcentaje."%<br><br>";
+        $nfilas = count ($noticias);
+        $n_preguntas = array();
+        
+        if ($nfilas > 0){
+            print("<form name='FormEncuesta' method='POST' action='procesar.php'>");
+
+            foreach ($noticias as $resultado) {
+                print("<div style='border: solid 1px'>");
+                print("&laquo");
+                print("<input type='hidden' name='encid".$resultado['id']."' value='".$resultado['id']."'>");
+                print("<b><label>".$resultado['encprg']."</label></b>");
+                print("<br><input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt1']."' required>".$resultado['encrpt1']."<br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt2']."' required>".$resultado['encrpt2']."<br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt3']."' required>".$resultado['encrpt3']."<br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt4']."' required>".$resultado['encrpt4']."<br>");
+                print("</div>");
+                print("<br>");
+            }
+            print("<input type='submit' name='enviar_encuesta' value='Votar'>");
+            print("</form>");
+            
+        }else{
+            print ("No hay noticias disponibles" );
+        }
+    }
 ?>
- <input type='submit' name='Enviar Encuesta' value='votar'>
-        </form>
-</body>
-
-</html>
+</BODY>
+</HTML>
