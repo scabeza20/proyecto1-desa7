@@ -1,4 +1,5 @@
 <?php
+    error_reporting(E_ALL ^ E_NOTICE);
     require_once('class/preguntas.php');
     require_once("vista.php");
     

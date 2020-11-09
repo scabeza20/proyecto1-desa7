@@ -76,26 +76,30 @@
         $obj_preguntas = new preguntas();
         $noticias = $obj_preguntas->listar_random();
         $porcentaje = 0;
-        echo"Porcentaje de respuestas:\n". $porcentaje."%<br><br>";
+        
         $nfilas = count ($noticias);
         $n_preguntas = array();
-        
+        $porcentaje=0;
+        $uno=1;
         if ($nfilas > 0){
             print("<form name='FormEncuesta' method='POST' action='procesar.php'>");
-
+                      
             foreach ($noticias as $resultado) {
+               
                 print("<div style='border: solid 1px'>");
                 print("&laquo");
                 print("<input type='hidden' name='encid".$resultado['id']."' value='".$resultado['id']."'>");
-                print("<b><label>".$resultado['encprg']."</label></b>");
-                print("<br><input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt1']."' required>".$resultado['encrpt1']."<br>");
-                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt2']."' required>".$resultado['encrpt2']."<br>");
-                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt3']."' required>".$resultado['encrpt3']."<br>");
-                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt4']."' required>".$resultado['encrpt4']."<br>");
+                print("<b><label>".$resultado['encprg']."</label></b><br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt1']."'>".$resultado['encrpt1']."<br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt2']."' >".$resultado['encrpt2']."<br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt3']."' >".$resultado['encrpt3']."<br>");
+                print("<input type='".$resultado['input']."' name='respuesta".$resultado['id']."' value='".$resultado['encrpt4']."' >".$resultado['encrpt4']."<br>");
                 print("</div>");
                 print("<br>");
             }
+            
             print("<input type='submit' name='enviar_encuesta' value='Votar'>");
+           // printf(" <progress id='file' max='".$nfilas."' value='".$porcentaje."'>  </progress>");
             print("</form>");
             
         }else{
